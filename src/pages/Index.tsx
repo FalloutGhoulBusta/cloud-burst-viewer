@@ -6,12 +6,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-// Valid city list for demonstration purposes
-const validCities = [
-  "london", "paris", "new york", "tokyo", "sydney", "berlin", "moscow",
-  "beijing", "rome", "madrid", "dubai", "singapore", "toronto", "delhi"
-];
-
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [weatherData, setWeatherData] = useState({
@@ -22,9 +16,23 @@ const Index = () => {
     windSpeed: 12,
   });
   const [invalidCity, setInvalidCity] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const { toast } = useToast();
 
-  const handleSearch = () => {
+  const validateCity = async (cityName: string) => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(cityName)}&format=json&limit=1`
+      );
+      const data = await response.json();
+      return data.length > 0;
+    } catch (error) {
+      console.error('Error validating city:', error);
+      return false;
+    }
+  };
+
+  const handleSearch = async () => {
     if (!searchQuery.trim()) {
       toast({
         title: "Error",
@@ -33,23 +41,21 @@ const Index = () => {
       });
       return;
     }
-    
-    // Check if the city exists in our list (case insensitive)
-    const cityExists = validCities.some(
-      city => city.toLowerCase() === searchQuery.toLowerCase()
-    );
-    
-    if (!cityExists) {
+
+    setIsSearching(true);
+    const isValidCity = await validateCity(searchQuery);
+    setIsSearching(false);
+
+    if (!isValidCity) {
       setInvalidCity(true);
       toast({
         title: "City not found",
-        description: `"${searchQuery}" is not in our database. Please try another city.`,
+        description: `"${searchQuery}" is not a valid city. Please try another city name.`,
         variant: "destructive",
       });
       return;
     }
-    
-    // Reset invalid city state
+
     setInvalidCity(false);
     
     // For now, we'll just update with mock data
