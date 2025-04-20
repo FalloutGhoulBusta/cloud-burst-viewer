@@ -1,5 +1,5 @@
 
-import { Search } from "lucide-react";
+import { Search, AlertCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -15,6 +15,12 @@ export const SearchBar = ({ value, onChange, onSearch }: SearchBarProps) => {
     onSearch();
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      onSearch();
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="flex gap-2 w-full max-w-md mb-8">
       <Input
@@ -22,6 +28,7 @@ export const SearchBar = ({ value, onChange, onSearch }: SearchBarProps) => {
         placeholder="Enter city name..."
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onKeyDown={handleKeyDown}
         className="bg-white/30 backdrop-blur-lg border-none"
       />
       <Button type="submit" className="bg-primary hover:bg-primary/80">
