@@ -1,4 +1,4 @@
-# FAW
+# FAQ
 
 ## Project info
 
