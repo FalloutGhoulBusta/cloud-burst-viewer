@@ -1,4 +1,4 @@
-# Welcome to my Lovable project
+# FAW
 
 ## Project info
 
