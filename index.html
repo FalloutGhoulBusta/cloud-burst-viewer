@@ -23,9 +23,13 @@
         var redirect = sessionStorage.redirect;
         delete sessionStorage.redirect;
         if (redirect && redirect !== location.href) {
-          history.replaceState(null, null, redirect.replace('/cloud-burst-viewer', '/cloud-burst-viewer/#'));
+          history.replaceState(null, null, redirect.replace('/cloud-burst-viewer', ''));
         }
       })();
+    </script>
+    <script type="module">
+      // Force detection of base URL for GitHub Pages
+      window.VITE_BASE_URL = "/cloud-burst-viewer/";
     </script>
   </head>
 

@@ -13,6 +13,8 @@ export default defineConfig(({ mode }) => ({
   base: mode === 'production' ? '/cloud-burst-viewer/' : '/',
   build: {
     outDir: 'dist',
+    assetsDir: 'assets',
+    sourcemap: true,
     rollupOptions: {
       output: {
         manualChunks: {

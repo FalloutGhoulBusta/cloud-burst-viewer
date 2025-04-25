@@ -6,8 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Redirecting...</title>
   <script>
+    // Store the current URL in sessionStorage
     sessionStorage.redirect = location.href;
-    window.location.href = "/cloud-burst-viewer/#/";
+    // Redirect to the base URL with a hash
+    window.location.replace("/cloud-burst-viewer/");
   </script>
 </head>
 <body>
