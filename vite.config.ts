@@ -11,6 +11,16 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
   },
   base: mode === 'production' ? '/cloud-burst-viewer/' : '/',
+  build: {
+    outDir: 'dist',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom']
+        }
+      }
+    }
+  },
   plugins: [
     react(),
     mode === 'development' &&
