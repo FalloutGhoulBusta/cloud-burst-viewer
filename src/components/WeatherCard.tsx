@@ -1,6 +1,8 @@
 
-import { Cloud, CloudRain, Sun, Wind } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import { useEffect, useState } from 'react';
+import { Cloud, CloudRain, Sun, Wind, Clock } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { weatherCodes, getLocalTime } from '@/utils/weatherUtils';
 
 interface WeatherCardProps {
   city: string;
@@ -8,6 +10,7 @@ interface WeatherCardProps {
   condition: string;
   humidity: number;
   windSpeed: number;
+  timezone?: string;
 }
 
 export const WeatherCard = ({
@@ -16,16 +19,29 @@ export const WeatherCard = ({
   condition,
   humidity,
   windSpeed,
+  timezone = 'UTC'
 }: WeatherCardProps) => {
+  const [localTime, setLocalTime] = useState(getLocalTime(timezone));
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setLocalTime(getLocalTime(timezone));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [timezone]);
+
   const getWeatherIcon = () => {
-    switch (condition.toLowerCase()) {
-      case "rain":
-        return <CloudRain className="w-16 h-16 text-primary" />;
-      case "cloudy":
-        return <Cloud className="w-16 h-16 text-primary" />;
-      default:
-        return <Sun className="w-16 h-16 text-primary" />;
+    const weatherCode = Object.entries(weatherCodes).find(
+      ([_, value]) => value.label.toLowerCase() === condition.toLowerCase()
+    );
+
+    if (weatherCode) {
+      const [_, data] = weatherCode;
+      return localTime.isNight ? data.nightIcon : data.icon;
     }
+
+    return localTime.isNight ? 'moon' : 'sun';
   };
 
   return (
@@ -35,6 +51,11 @@ export const WeatherCard = ({
         <div className="flex justify-center mb-4">{getWeatherIcon()}</div>
         <p className="text-4xl font-bold text-dark-purple">{temperature}°C</p>
         <p className="text-lg text-dark-purple/80 capitalize">{condition}</p>
+        <div className="mt-2 text-sm text-dark-purple/60">
+          <Clock className="inline w-4 h-4 mr-1" />
+          <span>{localTime.time}</span>
+          <p className="text-xs mt-1">{localTime.date}</p>
+        </div>
       </div>
       
       <div className="grid grid-cols-2 gap-4 mt-6">

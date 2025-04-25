@@ -1,10 +1,11 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { WeatherCard } from "@/components/WeatherCard";
 import { SearchBar } from "@/components/SearchBar";
 import { useToast } from "@/components/ui/use-toast";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { fetchWeatherData, weatherCodes } from "@/utils/weatherUtils";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -14,23 +15,11 @@ const Index = () => {
     condition: "Sunny",
     humidity: 65,
     windSpeed: 12,
+    timezone: "Europe/London"
   });
   const [invalidCity, setInvalidCity] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const { toast } = useToast();
-
-  const validateCity = async (cityName: string) => {
-    try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(cityName)}&format=json&limit=1`
-      );
-      const data = await response.json();
-      return data.length > 0;
-    } catch (error) {
-      console.error('Error validating city:', error);
-      return false;
-    }
-  };
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) {
@@ -43,32 +32,42 @@ const Index = () => {
     }
 
     setIsSearching(true);
-    const isValidCity = await validateCity(searchQuery);
-    setIsSearching(false);
+    try {
+      const { weatherData: data, timezone } = await fetchWeatherData(searchQuery);
+      
+      const weatherInfo = weatherCodes[data.weathercode] || {
+        label: "Unknown weather condition"
+      };
 
-    if (!isValidCity) {
+      setWeatherData({
+        city: searchQuery,
+        temperature: data.temperature,
+        condition: weatherInfo.label,
+        humidity: Math.floor(Math.random() * 30) + 50, // API doesn't provide humidity
+        windSpeed: data.windspeed,
+        timezone
+      });
+      
+      setInvalidCity(false);
+      setSearchQuery("");
+      
+    } catch (error) {
+      console.error('Error fetching weather:', error);
       setInvalidCity(true);
       toast({
         title: "City not found",
         description: `"${searchQuery}" is not a valid city. Please try another city name.`,
         variant: "destructive",
       });
-      return;
+    } finally {
+      setIsSearching(false);
     }
-
-    setInvalidCity(false);
-    
-    // For now, we'll just update with mock data
-    setWeatherData({
-      city: searchQuery,
-      temperature: Math.floor(Math.random() * 30) + 10,
-      condition: ["Sunny", "Cloudy", "Rain"][Math.floor(Math.random() * 3)],
-      humidity: Math.floor(Math.random() * 30) + 50,
-      windSpeed: Math.floor(Math.random() * 20) + 5,
-    });
-    
-    setSearchQuery("");
   };
+
+  // Initial weather fetch
+  useEffect(() => {
+    handleSearch();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-soft-blue to-primary/10 p-6">
@@ -78,6 +77,7 @@ const Index = () => {
           value={searchQuery}
           onChange={setSearchQuery}
           onSearch={handleSearch}
+          isSearching={isSearching}
         />
         
         {invalidCity && (
