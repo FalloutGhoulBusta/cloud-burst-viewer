@@ -16,7 +16,7 @@ const Index = () => {
     condition: "",
     humidity: 0,
     windSpeed: 0,
-    timezone: ""
+    timezone: "UTC" // Default to UTC timezone
   });
   const [invalidCity, setInvalidCity] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
@@ -37,7 +37,7 @@ const Index = () => {
         condition: weatherInfo.label,
         humidity: Math.floor(Math.random() * 30) + 50,
         windSpeed: data.windspeed,
-        timezone
+        timezone: timezone || randomCity.timezone || "UTC" // Fallback chain
       });
       
     } catch (error) {
@@ -71,7 +71,7 @@ const Index = () => {
         condition: weatherInfo.label,
         humidity: Math.floor(Math.random() * 30) + 50,
         windSpeed: data.windspeed,
-        timezone
+        timezone: timezone || "UTC" // Ensure we always have a fallback
       });
       
       setInvalidCity(false);

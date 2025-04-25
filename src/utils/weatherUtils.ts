@@ -70,46 +70,59 @@ export async function fetchWeatherData(city: string): Promise<{
   
   return {
     weatherData: weatherData.current_weather,
-    timezone: weatherData.timezone,
+    timezone: weatherData.timezone || 'UTC', // Provide a default timezone if empty
     lat: parseFloat(lat),
     lon: parseFloat(lon)
   };
 }
 
-export function getLocalTime(timezone: string): {
+export function getLocalTime(timezone: string = 'UTC'): {
   time: string;
   date: string;
   isNight: boolean;
 } {
+  // Ensure timezone is never empty
+  const safeTimezone = timezone && timezone.trim() ? timezone : 'UTC';
+  
   const now = new Date();
   
-  const timeFormatter = new Intl.DateTimeFormat('en-US', {
-    hour: 'numeric',
-    minute: 'numeric',
-    hour12: true,
-    timeZone: timezone
-  });
+  try {
+    const timeFormatter = new Intl.DateTimeFormat('en-US', {
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: true,
+      timeZone: safeTimezone
+    });
 
-  const dateFormatter = new Intl.DateTimeFormat('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    timeZone: timezone
-  });
+    const dateFormatter = new Intl.DateTimeFormat('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      timeZone: safeTimezone
+    });
 
-  const hourFormatter = new Intl.DateTimeFormat('en-US', {
-    hour: 'numeric',
-    hour12: false,
-    timeZone: timezone
-  });
-  
-  const hour = parseInt(hourFormatter.format(now));
-  const isNight = hour >= 18 || hour < 6;
-  
-  return {
-    time: timeFormatter.format(now),
-    date: dateFormatter.format(now),
-    isNight
-  };
+    const hourFormatter = new Intl.DateTimeFormat('en-US', {
+      hour: 'numeric',
+      hour12: false,
+      timeZone: safeTimezone
+    });
+    
+    const hour = parseInt(hourFormatter.format(now));
+    const isNight = hour >= 18 || hour < 6;
+    
+    return {
+      time: timeFormatter.format(now),
+      date: dateFormatter.format(now),
+      isNight
+    };
+  } catch (error) {
+    console.error('Error formatting time with timezone:', safeTimezone, error);
+    // Fallback to UTC if there's an error with the provided timezone
+    return {
+      time: now.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }),
+      date: now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+      isNight: false // Default to day if we can't determine
+    };
+  }
 }

@@ -21,15 +21,18 @@ export const WeatherCard = ({
   windSpeed,
   timezone = 'UTC'
 }: WeatherCardProps) => {
-  const [localTime, setLocalTime] = useState(getLocalTime(timezone));
+  // Ensure timezone is valid and never empty
+  const safeTimezone = timezone && timezone.trim() ? timezone : 'UTC';
+  
+  const [localTime, setLocalTime] = useState(getLocalTime(safeTimezone));
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setLocalTime(getLocalTime(timezone));
+      setLocalTime(getLocalTime(safeTimezone));
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [timezone]);
+  }, [safeTimezone]);
 
   const getWeatherIcon = () => {
     const weatherCode = Object.entries(weatherCodes).find(
