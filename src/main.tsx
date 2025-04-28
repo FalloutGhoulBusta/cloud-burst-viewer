@@ -3,7 +3,6 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 
-// Add error boundary to catch and log rendering errors
 try {
   console.log('Initializing app...');
   const rootElement = document.getElementById("root");
@@ -21,4 +20,9 @@ try {
   console.log('App rendered successfully');
 } catch (error) {
   console.error('Error rendering the app:', error);
+  // Display error to user
+  const rootElement = document.getElementById("root");
+  if (rootElement) {
+    rootElement.innerHTML = '<div style="color: red; padding: 20px;">Error loading the application. Please check the console for details.</div>';
+  }
 }
